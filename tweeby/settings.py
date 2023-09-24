@@ -12,9 +12,9 @@ SECRET_KEY = 'django-insecure-+jhd^@z8n##$(1h$4ohs*@)!)4sr0$qh)#doiqvir+ftonp!!0
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 DEBUG = True
-ALLOWED_HOSTS = ['.herokuapp.com', '127.0.0.1']
+ALLOWED_HOSTS = ['.onrender.com', '127.0.0.1']
 ROOT_URLCONF = 'tweeby.urls'
-CSRF_TRUSTED_ORIGINS = ['https://tweeby.herokuapp.com']
+CSRF_TRUSTED_ORIGINS = ['https://tweeby-7gzy.onrender.com']
 
 INSTALLED_APPS = [
     'django.contrib.admin',
