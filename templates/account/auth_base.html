@@ -1,0 +1,86 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="{% static 'resource/favicon.ico' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+    <title>{% block title %}{% endblock title %}</title>
+</head>
+<style>
+body {
+    overflow: hidden;
+    height: 100%;
+    background: #191c22;
+}
+.container {
+    height: 100vh; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center;
+}
+.form-block {
+    background: #ffffff;
+    border-radius: 2px;
+    padding: 45px 30px 20px 30px;
+}
+.form_float_view {
+    width: 70px;
+    background: #ffffff8c;
+    border-radius: 50%;
+    box-shadow: 0 -10px 19px rgb(0 0 0 / 38%);
+    position: absolute;
+    top: -35px;
+    left: 50%;
+    margin-left: -30px;
+}
+</style>
+{% block style %}{% endblock style %}
+<body>
+{% block body %}{% endblock body %}
+<script src="{% static 'js/jquery.min.js' %}"></script>
+<script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
+<script>
+const pass_field = $("#pass_field");
+const re_pass_field = $("#re_pass_field");
+const pass_icon = $("#pass_icon");
+const re_pass_icon = $("#re_pass_icon");
+let show_pass = true;
+let re_show_pass = true;
+function pass_toggle(){
+    if(show_pass){
+        show_pass = !show_pass;
+        pass_field.removeAttr("type");
+        pass_icon.removeClass("fa-eye");
+        pass_field.attr("type", "text");
+        pass_icon.addClass("fa-eye-slash");
+    }else{
+        show_pass = !show_pass;
+        pass_field.removeAttr("type");
+        pass_icon.removeClass("fa-eye-slash");
+        pass_field.attr("type", "password");
+        pass_icon.addClass("fa-eye");
+    }
+};
+function re_pass_toggle(){
+    if(re_show_pass){
+        re_show_pass = !re_show_pass;
+        re_pass_field.removeAttr("type");
+        re_pass_icon.removeClass("fa-eye");
+        re_pass_field.attr("type", "text");
+        re_pass_icon.addClass("fa-eye-slash");
+    }else{
+        re_show_pass = !re_show_pass;
+        re_pass_field.removeAttr("type");
+        re_pass_icon.removeClass("fa-eye-slash");
+        re_pass_field.attr("type", "password");
+        re_pass_icon.addClass("fa-eye");
+    }
+};
+</script>
+{% block script %}{% endblock script %}
+</body>
+</html>

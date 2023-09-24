@@ -1,0 +1,152 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="{% static 'resource/favicon.ico' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+    <title>{% block title %}Tweeby{% endblock title %}</title>
+</head>
+<style type="text/css">
+body{
+    background-color: #f9fafb;
+}
+#tweet_post_form textarea {
+  border: 0;
+}
+#tweet_post_form button {
+  background-color: #1d9bf0;
+    color: #fff;
+    border-radius: 25px;
+    margin: 10px 10px 10px 0;
+}
+#tweet_post_form img {
+  border-radius: 50%;
+  width: 35px;
+  height: 35px;
+  margin: 10px 0 0 10px;
+}
+#tweet_comment_form textarea {
+  border: 0;
+}
+#tweet_comment_form button {
+  background-color: #135d89;
+  color: #fff;
+  border-radius: 25px;
+  margin: 10px 10px 10px 0;
+}
+#tweet_comment_form img {
+  border-radius: 50%;
+  width: 35px;
+  height: 35px;
+  margin: 10px 0 0 10px;
+}
+#navbar{
+  position: -webkit-sticky;
+  position: sticky;
+  top: 0px;
+  z-index: 1;
+}
+#right_sidebar_list{
+  position: -webkit-sticky;
+  position: sticky;
+  top: 65px;
+}
+</style>
+{% block style %}{% endblock style %}
+<body>
+{% include "base/navbar.html" %}
+{% block body %}{% endblock body %}
+<script src="{% static 'js/jquery.min.js' %}"></script>
+<script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
+<script src="{% static 'js/clipboard.min.js' %}"></script>
+<script>
+new ClipboardJS("#clipboard_btn");
+$(document).ready(function(){
+    $("body").tooltip({ selector: "[data-toggle=tooltip]" });
+    
+    $("#tweet_post_form_input").on("keyup", function(){
+    if($("#tweet_post_form_input").val() != ""){
+        $("#tweet_post_form_btn").attr("disabled", false);
+    }else{
+        $("#tweet_post_form_btn").attr("disabled", true);
+    }
+    });
+});
+
+$(document).click(function(){
+    $(".nav_search_result").addClass("d-none");
+});
+
+$(".nav_search_field").on("keyup", function(e){
+  if($(this).val().length < 1){
+    $(".nav_search_result").empty();
+  }
+});
+
+$(".nav_search_field").on("input", function(e){
+  e.preventDefault();
+  let value = $(this).val();
+  let result = $(".nav_search_result");
+  result.removeClass("d-none");
+  let users = [];
+  if($(this).val().length > 2){
+    $.ajax({
+    type: "POST",
+    url: "{% url 'nav_search_bar' %}",
+    data: {value: value},
+    success: function(res){
+      if(res.data.length > 0){
+        result.empty();
+        users.push(res.data);
+        users[0].map(function(user){
+          result.append(`<a href="/u/${user.username}" class="text-decoration-none"><list class="list-group-item list-group-item-action"><div class="d-flex justify-content-between">
+      <div class="d-flex">
+        <img src="${user.picture}" width="40px" height="40px" style="border-radius: 50%;" class="shadow-sm">
+        <div class="text-muted d-inline ml-2">
+          <h6 class="text-info mb-0">${user.name}</h6>
+          <small>@${user.username}</small>
+        </div>
+      </div>
+    </div></li></a>`);
+        });
+      }else{
+        result.empty();
+        result.append("<list class='list-group-item text-muted text-center'>no user found!</li>");
+      }
+    }
+  });
+  }else{
+    result.empty();
+    result.append(`<li class="list-group-item d-flex justify-content-center py-1"><img src="{% static 'resource/search_loading.gif' %}" width="120px"></li>`)
+  }
+});
+
+
+$(document).on("click", ".sidebar_follow_btn", function(e){
+  e.preventDefault();
+  let btn = $("#sidebar_follow_btn_"+$(this).attr("user"));
+  $.ajax({
+    type: "POST",
+    url: "{% url 'follow_handler' %}",
+    data: {user: $(this).attr("user")},
+    success: function(res){
+      if(res.status == 0){
+        btn.removeClass("btn-light border");
+        btn.html("Follow");
+        btn.addClass("btn-primary");
+      }else{
+        btn.removeClass("btn-primary");
+        btn.html("Unfollow");
+        btn.addClass("btn-light border");
+      }
+    }
+  });
+});
+</script>
+{% block script %}{% endblock script %}
+</body>
+</html>

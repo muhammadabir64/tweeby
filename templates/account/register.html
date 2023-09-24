@@ -1,0 +1,102 @@
+{% extends "account/auth_base.html" %}
+{% load static %}
+{% block title %}Welcome to Tweeby | Create an Account{% endblock title %}
+{% block style %}
+<style>
+</style>
+{% endblock style %}
+{% include "base/navbar.html" %}
+{% block body %}
+<div class="container">
+<div class="form-block col-md-4">
+{% if messages %}
+{% for msg in messages %}
+<div class="alert alert-{{ msg.tags }} alert-dismissible fade show" role="alert">
+{{ msg|safe }}
+<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+<span aria-hidden="true">&times;</span>
+</button>
+</div>
+{% endfor %}
+{% endif %}
+<form action="{% url 'register' %}" method="POST">
+    {% csrf_token %}
+        <div class="form_float_view"><img src="{% static 'resource/default_avatar.png' %}" class="w-100"></div>
+        <div class="row mb-2">
+            <div class="col-12 mb-2">
+                <input type="text" name="username" class="form-control" placeholder="Username" required>
+            </div>
+            <div class="col-12 mb-2">
+                <input type="email" name="email" class="form-control" placeholder="Email" required>
+            </div>
+            <div class="col-12 mb-2">
+                <div class="input-group">
+                    <input type="password" name="password1" class="form-control" id="pass_field" placeholder="Password" required>
+                <div class="input-group-prepend">
+                    <a href="javascript:void(0)" onclick="pass_toggle()" class="input-group-text text-decoration-none">
+                        <i class="fa-solid fa-eye" id="pass_icon"></i>
+                    </a>
+                </div>
+                </div>
+            </div>
+            <div class="col-12 mb-2">
+                <div class="input-group">
+                    <input type="password" name="password2" class="form-control" id="re_pass_field" placeholder="Confirm password" required>
+                <div class="input-group-prepend">
+                    <a href="javascript:void(0)" onclick="re_pass_toggle()" class="input-group-text text-decoration-none">
+                        <i class="fa-solid fa-eye" id="re_pass_icon"></i>
+                    </a>
+                </div>
+                </div>
+            </div>
+        </div>
+    <input type="hidden" name="flag" id="flag">
+    <input type="hidden" name="city" id="city">
+    <input type="hidden" name="country" id="country">
+    <button type="submit" class="btn btn-dark w-100">Sign up</button>
+</form>
+<div class="text-center">
+    <hr class="text-muted mb-1" width="50px">
+    <small class="text-muted">Already have an account? <a href="{% url 'login' %}" class="text-decoration-none">Login here</a></small>
+</div>
+</div>
+</div>
+
+<div class="modal fade" id="adblocker_modal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+      <div class="modal-content">
+        <div class="modal-body text-center">
+          <h4><i class="fas fa-exclamation-triangle text-danger"></i> There is an issue with your browser!</h4>
+          <p><span class="text-info">system: </span>please consider to disable/turn-off your adblocker for now... enable it once you done register.</p>
+          <small class="text-muted d-block">- Thank you</small>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock body %}
+{% block script %}
+<script>
+$(document).ready(function(){
+async function detectAdBlock(){
+  let adBlockEnabled = false
+  const googleAdUrl = "https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js";
+  try {
+    await fetch(new Request(googleAdUrl)).catch(_ => adBlockEnabled = true)
+  } catch (e) {
+    adBlockEnabled = true
+  } finally {
+    if(adBlockEnabled == true){
+        $("#adblocker_modal").modal({backdrop: "static", keyboard: false});
+    }else{
+        $.get("http://ip-api.com/json", function(data) {
+            $("#flag").val(data.countryCode.toLowerCase());
+            $("#city").val(data.city);
+            $("#country").val(data.country);
+        }, "jsonp");
+    }
+  }
+}
+detectAdBlock();
+});
+</script>
+{% endblock script %}

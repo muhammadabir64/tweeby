@@ -1,0 +1,50 @@
+{% extends "base/base.html" %}
+{% load tweet_extras %}
+{% block title %}{{ user.first_name }} {{ user.last_name }} | My Followers{% endblock title %}
+{% block style %}
+{% endblock style %}
+{% block body %}
+<div class="container">
+<div class="row">
+<div class="col-md-8">
+<div class="card card-body p-0">
+<ul class="list-group" id="right_sidebar_list">
+  <li class="list-group-item">
+    <h6 class="m-0">Peoples who following me</h6>
+  </li>
+{% if followers %}
+{% for follower in followers %}
+<li class="list-group-item">
+  <div class="d-flex justify-content-between">
+    <div class="d-flex">
+      <img src="{{ follower.profile_img }}" width="40px" height="40px" style="border-radius: 50%;" class="shadow-sm">
+      <div class="text-muted d-inline ml-2">
+        <h6 class="mb-0"><a href="{% url 'profile' username=follower.user %}" class="text-decoration-none">{{ follower.user.first_name }} {{ follower.user.last_name }}</a></h6>
+        <small>@{{ follower.user.username }}</small>
+      </div>
+    </div>
+    <div class="d-flex align-items-center">
+      <form action="{% url 'follower_remover' %}" method="POST">
+        <input type="hidden" name="user_id" value="{{ follower.id }}">
+        <button type="submit" class="btn btn-danger btn-sm align-middle">Remove</button>
+      </form>
+    </div>
+  </div>
+</li>
+{% endfor %}
+{% else %}
+<small class="text-muted text-center">sorry to say... nobody follows you!</small>
+{% endif %}
+</ul>
+</div>
+</div>
+
+<div class="col-md-4 d-none d-sm-block">
+{% include "base/right_sidebar.html" %}
+</div>
+
+</div>
+</div>
+{% endblock body %}
+{% block script %}
+{% endblock script %}

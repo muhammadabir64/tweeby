@@ -1,0 +1,44 @@
+{% load static %}
+<nav class="navbar navbar-expand-lg navbar-light bg-light shadow mb-2" id="navbar">
+  <div class="container">
+    <a class="navbar-brand" href="{% url 'feed' %}"><img src="{% static 'resource/favicon.ico' %}" width="20px">Twe<span class="text-danger">eby</span></a>
+
+  <div class="form-inline col">
+    <input class="form-control w-100 nav_search_field" type="search" placeholder="search..." required>
+<ul class="d-none list-group position-absolute w-100 nav_search_result" style="top: 55px"></ul>
+  </div>
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar_icon_btn">
+    <i class="fa-solid fa-bars"></i>
+  </button>
+
+
+  <div class="collapse navbar-collapse" id="navbar_icon_btn">
+    <ul class="navbar-nav ml-auto">
+      <li class="nav-item">
+        <a href="{% url 'feed' %}" class="nav-link" data-toggle="tooltip" data-placement="bottom" title="Newsfeed"><i class="fa-solid fa-home"></i><span class="d-lg-none"> Newsfeed</span></a>
+      </li>
+      <li class="nav-item">
+        <a href="#" class="nav-link" data-toggle="tooltip" data-placement="bottom" title="Notification"><i class="fa-solid fa-bell"></i><span class="d-lg-none"> Notification</span></a>
+      </li>
+      <li class="nav-item">
+        <a href="{% url 'messages' %}" class="nav-link" data-toggle="tooltip" data-placement="bottom" title="Messages"><i class="fa-solid fa-comment"></i><span class="d-lg-none"> Messages</span></a>
+      </li>
+      <li class="nav-item">
+        <a href="{% url 'global_room' %}" class="nav-link" data-toggle="tooltip" data-placement="bottom" title="Global Chat"><i class="fa-solid fa-globe"></i><span class="d-lg-none"> Global</span></a>
+      </li>
+      <li class="nav-item">
+        <a href="{% url 'profile' username=request.user %}" class="nav-link" data-toggle="tooltip" data-placement="bottom" title="Profile"><i class="fa-solid fa-user"></i><span class="d-lg-none"> Profile</span></a>
+      </li>
+      {% if user.is_superuser %}
+      <li class="nav-item">
+        <a href="/admin" class="nav-link" data-toggle="tooltip" data-placement="bottom" title="Admin Panel"><i class="fas fa-user-cog"></i><span class="d-lg-none"> Admin</span></a>
+      </li>
+      {% endif %}
+      <li class="nav-item">
+        <hr class="d-lg-none text-muted m-0">
+        <a href="{% url 'logout' %}" class="nav-link" data-toggle="tooltip" data-placement="bottom" title="Logout"><i class="fa-solid fa-right-from-bracket"></i><span class="d-lg-none"> Logout</span></a>
+      </li>
+    </ul>
+  </div>
+  </div>
+</nav>

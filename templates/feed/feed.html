@@ -1,0 +1,195 @@
+{% extends "base/base.html" %}
+{% load tweet_extras %}
+{% block title %}Tweeby{% endblock title %}
+{% block style %}
+<style>
+.dropdown-toggle::after {
+    display:none;
+}
+.card_header_feed img {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+}
+.card-body p img {
+  width: 100%;
+}
+.like_btn:hover {
+  background-color: aliceblue;
+}
+.like_btn:focus {
+  box-shadow: none;
+}
+</style>
+{% endblock style %}
+{% block body %}
+<div class="container">
+<div class="row">
+<div class="col-md-8">
+<!--feed input box :start-->
+<div class="card card-body p-0 mb-4">
+  <form action="{% url 'tweet_publish' %}" method="POST" id="tweet_post_form">
+    {% csrf_token %}
+    <div class="d-flex">
+      <img class="shadow-sm" src="{{ user.account.profile_img }}">
+      <textarea class="form-control d-inline-block" name="tweet_content" id="tweet_post_form_input" placeholder="What's on your mind?"></textarea>
+    </div>
+    <input type="hidden" name="redirect_uri" value="feed">
+    <div class="d-flex justify-content-end">
+      <button type="submit" class="btn px-4" id="tweet_post_form_btn" disabled>Post</button>
+    </div>
+  </form>
+</div>
+<!--feed input box :end-->
+<!--tweet :start-->
+{% if tweets %}
+{% for tweet in tweets %}
+<div class="card mb-4">
+  <div class="card-body">
+    <div class="card-title card_header_feed mb-4"><img class="shadow-sm mr-2" src="{{ tweet.user.profile_img }}"><h6 class="d-inline"><a href="{% url 'profile' username=tweet.user.user %}" class="text-dark text-decoration-none">{{ tweet.user.user.first_name }} {{ tweet.user.user.last_name }}</a></h6>&nbsp;<span class="text-muted">@{{ tweet.user.user.username }}</span>&nbsp;<i class="fa-solid fa-circle mr-1" style="font-size: 3px; vertical-align: middle;"></i><small class="text-muted">{{ tweet.publish_date|timesince }} ago</small>
+      <div class="dropdown d-inline float-right">
+        <a  class="dropdown-toggle" data-toggle="dropdown"><i class="fa-solid fa-ellipsis text-muted"></i></a>
+        <div class="dropdown-menu dropdown-menu-right">
+      {% if user.username == tweet.user.user.username %}
+        <a class="dropdown-item"><i class="fas fa-edit text-muted mr-2"></i>Edit</a>
+        <hr class="text-muted m-0">
+        <a class="dropdown-item" href="{% url 'tweet_remover' tweet=tweet.id uri='feed' %}"><i class="fas fa-trash text-muted mr-2"></i>Delete</a>
+      {% else %}
+        <a class="dropdown-item" href="#"><i class="fa-solid fa-flag text-muted mr-2"></i>Report this post</a>
+      {% endif %}
+        </div>
+      </div>
+    </div>
+      <p class="card-text">{{ tweet.content|markdown_it|safe }}</p>
+    <hr class="text-muted mb-1">
+    <div class="d-inline mr-4">
+      <form id="like_form" tweet_id="{{ tweet.id }}" class="d-inline">
+        <button type="submit" class="btn like_btn">
+        <div class="d-inline" id="react_icon{{ tweet.id }}">
+          {% if user.account in tweet.likes.all %}
+          <i class="fas fa-heart text-danger"></i>
+          {% else %}
+          <i class="far fa-heart"></i>
+          {% endif %}
+        </div>
+        <span id="react_count{{ tweet.id }}">{{ tweet.total_likes }}</span>
+        </button>
+        </form>      
+    </div>
+    <div class="d-inline">
+      <a href="#comment_collapse{{ tweet.id }}" data-toggle="collapse" role="button" class="text-dark text-decoration-none"><i class="fa-regular fa-comment"></i></a> <span id="comment_count{{ tweet.id }}">{{ tweet.total_comments }}</span>
+    </div>
+
+    <div class="collapse mt-3" id="comment_collapse{{ tweet.id }}">
+        <form id="tweet_comment_form" tweet_id="{{ tweet.id }}">
+          {% csrf_token %}
+          <div class="d-flex">
+            <img class="shadow-sm" src="{{ user.account.profile_img }}">
+            <textarea class="form-control d-inline-block" name="tweet_comment" id="tweet_comment_field{{ tweet.id }}" placeholder="write a comment..."></textarea>
+          </div>
+          <div class="d-flex justify-content-end">
+            <button type="submit" class="btn btn-sm px-4">Comment</button>
+          </div>
+        </form>
+        <hr class="text-muted mt-0 mb-1">
+        <ul class="list-group list-group-flush" id="comment_container">
+          {% for comment in tweet.comments.all reversed %}
+          <li class="list-group-item">
+            <div class="card card-body p-0" style="border: none;">
+              <div class="card-title card_header_feed">
+                <img class="shadow-sm mr-2" src="{{ comment.user.profile_img }}"><h6 class="d-inline">{{ comment.user.user.first_name }} {{ comment.user.user.last_name }}</h6>&nbsp;<span class="text-muted">@{{ comment.user }}</span>&nbsp;<i class="fa-solid fa-circle mr-1" style="font-size: 3px; vertical-align: middle;"></i><small class="text-muted">{{ comment.publish_date|timesince }}</small>
+                <div class="dropdown d-inline float-right">
+                  <a  class="dropdown-toggle" data-toggle="dropdown"><i class="fa-solid fa-ellipsis text-muted"></i></a>
+                  <div class="dropdown-menu dropdown-menu-right">
+                    <a class="dropdown-item" href="#"><i class="fa-solid fa-flag text-muted mr-2"></i>Report this comment</a>
+                  </div>
+                </div>
+              </div>
+              <p class="card-text ml-4">{{ comment.content }}</p>
+            </div>
+          </li>
+        {% endfor %}
+        </ul>
+    </div>
+
+  </div>
+</div>
+{% endfor %}
+{% else %}
+<div class="text-center mb-2">
+<small class="text-muted d-block">nothing available for you!</small>
+<small class="text-info">tip: follow some peoples</small>
+</div>
+{% endif %}
+<!--tweet :end-->
+</div>
+<div class="col-md-4 d-none d-sm-block">
+{% include "base/right_sidebar.html" %}
+</div>
+
+</div>
+</div>
+{% endblock body %}
+{% block script %}
+<script>
+$(document).on("submit", "#like_form", function(e){
+  e.preventDefault();
+  let form = $(this);
+  let tweet_id = form.attr("tweet_id");
+  let react_count = $("#react_count"+tweet_id);
+  let react_icon = $("#react_icon"+tweet_id);
+
+  $.ajax({
+    type: "POST",
+    url: "{% url 'likes_handler' %}",
+    data: {tweet_id: tweet_id},
+    success: function(res){
+      if(res.status === 0){
+        react_count.html(res.total);
+        react_icon.html("<i class='far fa-heart'></i>");
+      }else{
+        react_count.html(res.total);
+        react_icon.html("<i class='fas fa-heart text-danger'></i>");
+      }
+    }
+  });
+});
+
+$(document).on("submit", "#tweet_comment_form", function(e){
+  e.preventDefault();
+  let form = $(this);
+  let tweet_id = form.attr("tweet_id");
+  let content = $("#tweet_comment_field"+tweet_id).val()
+  let comment_count = $("#comment_count"+tweet_id);
+
+  $.ajax({
+    type: "POST",
+    url: "{% url 'tweet_comment_publish' %}",
+    data: {tweet_id: tweet_id, content: content},
+    success: function(res){
+      if(res.status === 0){
+        let res_data = `<li class="list-group-item" style="background: aliceblue;">
+            <div class="card card-body p-0" style="background: aliceblue; border: none;">
+              <div class="card-title card_header_feed">
+                <img class="shadow-sm mr-2" src="${res.user_img}"><h6 class="d-inline">${res.user_full_name}</h6>&nbsp;<span class="text-muted">@${res.username}</span>&nbsp;<i class="fa-solid fa-circle mr-1" style="font-size: 3px; vertical-align: middle;"></i><small class="text-muted">0 minutes ago</small>
+                <div class="dropdown d-inline float-right">
+                  <a  class="dropdown-toggle" data-toggle="dropdown"><i class="fa-solid fa-ellipsis text-muted"></i></a>
+                  <div class="dropdown-menu dropdown-menu-right">
+                    <a class="dropdown-item" href="#"><i class="fa-solid fa-flag text-muted mr-2"></i>Report this comment</a>
+                  </div>
+                </div>
+              </div>
+              <p class="card-text ml-4">${content}</p>
+            </div>
+          </li>`;
+          comment_count.text(res.total);
+        $("#comment_container").prepend(res_data);
+        form[0].reset();
+      }
+    }
+  
+  });
+
+});
+</script>
+{% endblock script %}

@@ -1,0 +1,25 @@
+<ul class="list-group" id="right_sidebar_list">
+  <li class="list-group-item">
+    <h6 class="m-0">You might like</h6>
+  </li>
+{% if otherUsers %}
+{% for people in otherUsers %}
+<li class="list-group-item">
+  <div class="d-flex justify-content-between">
+    <div class="d-flex">
+      <img src="{{ people.profile_img }}" width="40px" height="40px" style="border-radius: 50%;" class="shadow-sm">
+      <div class="text-muted d-inline ml-2">
+        <h6 class="mb-0"><a href="{% url 'profile' username=people.user %}" class="text-decoration-none">{{ people.user.first_name }} {{ people.user.last_name }}</a></h6>
+        <small>@{{ people.user.username }}</small>
+      </div>
+    </div>
+    <div class="d-flex align-items-center">
+      <button type="button" id="sidebar_follow_btn_{{ people.user }}" user="{{ people.user }}" class="btn btn-primary btn-sm align-middle sidebar_follow_btn">Follow</button>
+    </div>
+  </div>
+</li>
+{% endfor %}
+{% else %}
+<small class="text-muted text-center">no relevant peoples!</small>
+{% endif %}
+</ul>

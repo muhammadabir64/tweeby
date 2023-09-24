@@ -1,0 +1,115 @@
+{% extends "base/base.html" %}
+{% load static %}
+{% block title %}Messages{% endblock title %}
+{% block style %}
+<style>
+@media(min-height: 500px){
+    #message_body{
+    height: calc(100vh - 120px);
+    }
+}
+@media(min-height: 700px){
+    #message_body{
+    height: calc(100vh - 65px);
+    }
+}
+@media(min-height: 1000px){
+    #message_body{
+    height: calc(100vh - 65px);
+    }
+}
+#message_body_header{
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+}
+.messages_scrollbar{
+    position: relative;
+    height: 100vh;
+    overflow-y: auto;
+    overflow-x: hidden;    
+}
+.box_wraper{
+    width: 100%;
+}
+#g_msg_field{
+    background-color: #f0f2f5;
+    border-radius: 15px;
+}
+#g_msg_btn{
+    color: #228dff;
+    border: 0;
+    border-radius: 50%;
+}
+.card-footer{
+    border: none;
+    background-color: #f8f8f887;
+}
+.logged_user_active_status{
+    color: #00d600;
+    font-size: 10px;
+}
+.message_wraper{
+    width: fit-content;
+}
+.message_div{
+    border-radius: 15px;
+}
+.message_div .card-header{
+    border-radius: 15px 15px 0 0;
+}
+.message_div .message_text{
+    max-width: 800px;
+}
+#msg_user_profile_img{
+  width: 40px;
+  border-radius: 50%;
+}
+#logged_user_img{
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+}
+#user_join_left_img{
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    vertical-align: sub;
+}
+</style>
+{% endblock style %}
+{% block body %}
+<div class="row w-100 m-0">
+<div class="col-lg-3 p-0">
+{% include "private_room/sidebar.html" %}
+</div>
+<div class="col-lg-9 p-0 d-none d-lg-block">
+<div style="overflow: hidden;">
+    <div class="card" id="message_body">
+    <div class="d-flex flex-column justify-content-center align-items-center card-body px-2 pb-0 messages_scrollbar">
+    <img src="{% static 'resource/message_room_art.jpg' %}" width="400px">
+    <h5 class="text-muted">Send private messages to a friend</h5>
+    </div>
+    </div>
+    </div>
+</div>
+</div>
+{% endblock body %}
+{% block script %}
+<script>
+function msg_tone(){
+    const audio = new Audio(`${window.location.protocol}//${window.location.host}/static/resource/msg_tone.mp3`);audio.play();
+}
+function scrollDown(){
+    $(".messages_scrollbar").animate({
+    scrollTop: $(".messages_scrollbar")[0].scrollHeight
+}, 2000);
+}
+
+
+addEventListener("load", function() {
+    var viewport = document.querySelector("meta[name=viewport]");
+    viewport.setAttribute("content", viewport.content + ", height=" + window.innerHeight);
+});
+</script>
+{% endblock script %}

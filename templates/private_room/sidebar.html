@@ -1,0 +1,22 @@
+<div class="card card-body p-0">
+<ul class="list-group">
+{% if users_list %}
+{% for user_l in users_list reversed %}
+<a href="{% url 'chat_room' thread_self=user.account.thread_code thread=user_l.thread_code %}" class="text-decoration-none">
+<li class="list-group-item list-group-item-action border-right-0 border-left-0 border-top-0">
+<div class="d-flex justify-content-between">
+    <div class="d-flex">
+      <img src="{{ user_l.profile_img }}" width="40px" height="40px" style="border-radius: 50%;" class="shadow-sm">
+      <div class="text-muted d-inline ml-2">
+        <h6 class="text-info mb-0">{{ user_l.user.first_name }} {{ user_l.user.last_name }}</h6>
+        <small class="text-muted">last messages</small>
+      </div>
+    </div>
+  </div>
+</li>
+</a>
+{% endfor %}
+{% else %}
+{% endif %}
+</ul>
+</div>

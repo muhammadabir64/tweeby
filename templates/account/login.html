@@ -1,0 +1,72 @@
+{% extends "account/auth_base.html" %}
+{% load static %}
+{% block title %}Welcome to Tweeby | Login or Signup{% endblock title %}
+{% block style %}
+<style>
+</style>
+{% endblock style %}
+{% include "base/navbar.html" %}
+{% block body %}
+<div class="container">
+<div class="form-block col-md-4">
+{% if messages %}
+{% for msg in messages %}
+<div class="alert alert-{{ msg.tags }} alert-dismissible fade show" role="alert">
+{{ msg|safe }}
+<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+<span aria-hidden="true">&times;</span>
+</button>
+</div>
+{% endfor %}
+{% endif %}
+<form action="{% url 'login' %}" method="POST">
+    {% csrf_token %}
+        <div class="form_float_view"><img src="{% static 'resource/default_avatar.png' %}" class="w-100"></div>
+        <div class="form-group">
+            <input type="text" name="username" class="form-control" placeholder="username" required>
+        </div>
+        <div class="form-group">
+            <div class="input-group">
+                <input type="password" name="password" class="form-control" id="pass_field" placeholder="Password" required>
+            <div class="input-group-prepend">
+                <a href="javascript:void(0)" onclick="pass_toggle()" class="input-group-text text-decoration-none">
+                    <i class="fa-solid fa-eye" id="pass_icon"></i>
+                </a>
+            </div>
+            </div>
+        </div>
+    <button type="submit" class="btn btn-dark w-100">Login</button>
+</form>
+<div class="text-right">
+    <small><a href="{% url 'password_reset' %}" class="text-decoration-none">Forgot Password</a></small>
+</div>
+<div class="text-center my-4">
+<button class="btn btn-info" id="demoUser1"><i class="fas fa-user-circle"></i> Demo User 1</button>
+<button class="btn btn-info" id="demoUser2"><i class="fas fa-user-circle"></i> Demo User 2</button>
+</div>
+<div class="text-center">
+    <hr class="text-muted mb-1" width="50px">
+    <small class="text-muted">Don't have an account? <a href="{% url 'register' %}" class="text-decoration-none">Create one</a></small>
+</div>
+</div>
+</div>
+{% endblock body %}
+{% block script %}
+<script>
+    const demoUser1Button = document.getElementById('demoUser1');
+    const demoUser2Button = document.getElementById('demoUser2');
+    const usernameField = document.querySelector('input[name="username"]');
+    const passwordField = document.querySelector('input[name="password"]');
+    const loginForm = document.querySelector('form');
+
+    demoUser1Button.addEventListener('click', () => {
+        usernameField.value = 'demo1';
+        passwordField.value = 'pass123';
+    });
+
+    demoUser2Button.addEventListener('click', () => {
+        usernameField.value = 'demo2';
+        passwordField.value = 'pass123';
+    });
+</script>
+{% endblock script %}

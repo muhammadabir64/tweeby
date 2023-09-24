@@ -1,0 +1,596 @@
+{% extends "base/base.html" %}
+{% load tweet_extras %}
+{% block title %}
+{{ userData.user.first_name }} {{ userData.user.last_name }} | Tweeby
+{% endblock title %}
+{% block style %}
+<style>
+.panel-bg-cover {
+  max-height: 180px;
+  overflow: hidden;
+}
+.panel-bg-cover img {
+  width: 100%;
+  background-size: cover;
+}
+.panel-media {
+  box-shadow: 0 -50px 20px -10px rgba(0,0,0,0.2);
+  padding: 10px 15px 15px 140px;
+  position: relative;
+}
+.panel-media-img {
+  position: absolute;
+  width: 96px;
+  height: 96px;
+  left: 20px;
+  top: -48px;
+  border-radius: 50%;
+}
+.img-border-light {
+  box-shadow: 0 0 0 4px #fff;
+}
+@media (min-width: 1200px){
+    .text-lg-right {
+      text-align: right;
+    }
+}
+.follow_btn {
+    border-radius: 50px;
+    font-weight: 600;
+}
+.follow_btn:hover {
+    background-color: #ffffff;
+    color: #000000;
+    border: 1px solid #00000052;
+}
+.follow_other_btn {
+    border: 1px solid #b5b5b596;
+    border-radius: 50%;
+    margin: 0 0 0 10px;
+    width: 34px;
+    height: 34px;
+    display: flex;
+    align-items: center;
+    background-color: #fff;
+    justify-content: center;
+}
+.follow_other_btn:hover {
+  cursor: pointer;
+  background-color: #e6e6e6ec;
+  text-decoration: none;
+}
+.dropdown-toggle::after {
+    display:none;
+}
+a.nav-link.active {
+  border-bottom: 4px solid #55c57a;
+}
+.nav-link {
+  color: rgb(110, 110, 110);
+  font-weight: 500;
+}
+.nav-link:hover {
+  color: #55c57a;
+}
+.nav-pills .nav-link.active {
+  color: black;
+  background-color: white;
+  border-radius: 0.5rem 0.5rem 0 0;
+  font-weight: 600;
+}
+.card_header_feed img {
+  width: 30px;
+  border-radius: 50%;
+}
+.card-body p img {
+  width: 100%;
+}
+.like_btn:hover {
+  background-color: aliceblue;
+}
+.like_btn:focus {
+  box-shadow: none;
+}
+.star_badge_icon {
+  font-size: 13px;
+  margin-left: 6px;
+}
+</style>
+{% endblock style %}
+{% block body %}
+<div class="container">
+<div class="row">
+<div class="col-md-8">
+<!--profile :start-->
+<div class="card card-body p-0">
+        <div class="panel-bg-cover">
+          <img class="img-responsive" src="{{ userData.cover_img }}">
+        </div>
+        <div class="panel-media">
+          <img src="{{ userData.profile_img }}" class="panel-media-img img-circle img-border-light">
+        {% if user.username == userData.user.username %}
+        <div class="d-flex justify-content-end">
+          <a class="follow_other_btn text-muted" data-toggle="modal" data-target="#edit_modal" title="Edit"><i class="fas fa-user-edit"></i></a>
+          <a class="follow_other_btn text-muted" data-toggle="modal" data-target="#setting_modal" title="Settings"><i class="fas fa-user-cog"></i></a>
+        </div>
+        {% else %}
+        <div class="d-flex justify-content-end">
+          <form id="follow_form" user="{{ userData.user }}">
+            {% if user.account in userData.followers.all %}
+            <button type="submit" id="follow_btn" class="btn btn-light border follow_btn px-3"><i class="fas fa-user-check text-success"></i> Unfollow</button>
+            {% else %}
+            <button type="submit" id="follow_btn" class="btn btn-dark follow_btn px-3">Follow</button>
+            {% endif %}
+          </form>
+          <div class="dropdown">
+            <a  class="follow_other_btn dropdown-toggle" data-toggle="dropdown"><i class="fa-solid fa-ellipsis text-muted"></i></a>
+            <div class="dropdown-menu dropdown-menu-right">
+              <a class="dropdown-item" href="#"><i class="fas fa-comment text-muted mr-2"></i>Message</a>
+              <hr class="text-muted m-0">
+              <a class="dropdown-item profile_clipboard_btn" id="clipboard_btn"><i class="fa-solid fa-link text-muted mr-2"></i>Copy profile link</a>
+              <hr class="text-muted m-0">
+              <a class="dropdown-item" href="#"><i class="fa-solid fa-flag text-muted mr-2"></i>Report this user</a>
+            </div>
+          </div>
+        </div>
+        {% endif %}
+        </div>
+        <div class="ml-3 mb-4">
+            <div class="d-flex align-items-center">
+              <h4 class="font-weight-bold text-dark m-0">{{ userData.user.first_name }} {{ userData.user.last_name }}</h4>
+              {% if userData.star_badge %}
+              <i class="fas fa-check-circle text-primary star_badge_icon" data-toggle="tooltip" data-placement="top" title="Verified"></i>
+              {% endif %}
+            </div>
+            <span class="text-muted">@{{ userData.user.username }}</span>
+            <p class="mt-2">{{ userData.bio }}</p>
+            <small><img src="/static/flags/{{ userData.flag }}.svg" width="18px"> {{ userData.city }}, {{ userData.country }}</small>
+            <small class="ml-3"><i class="fa-solid fa-calendar-days text-muted"></i> Joined {{ userData.user.date_joined|date:"M Y" }}</small>
+            <div class="text-muted mt-2">
+              {% if user.username == userData.user.username %}
+                <a href="{% url 'following_list' %}" class="text-decoration-none text-muted mr-3"><small><span class="font-weight-bold">{{ userData.total_following }}</span> Following</small></a>
+                <a href="{% url 'followers_list' %}" class="text-decoration-none text-muted"><small><span class="font-weight-bold" id="followers">{{ userData.total_followers }}</span> Followers</small></a>
+              {% else %}
+                <small class="text-muted mr-3"><span class="font-weight-bold">{{ userData.total_following }}</span> Following</small>
+                <small class="text-muted"><span class="font-weight-bold" id="followers">{{ userData.total_followers }}</span> Followers</small>
+              {% endif %}
+            </div>
+        </div>
+<!--profile :end-->
+<!--feed :start-->
+  <ul class="nav nav-pills mb-3 px-4" role="tablist">
+    <li class="nav-item">
+      <a class="nav-link active" data-toggle="pill" href="#timeline-tab" role="tab">Timeline</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" data-toggle="pill" href="#about-tab" role="tab">About</a>
+    </li>
+  </ul>
+  <!-- content -->
+<div class="tab-content px-3">
+    <!-- timeline card -->
+    <div class="tab-pane fade show active" id="timeline-tab" role="tabpanel">
+
+<!--feed input box :start-->
+{% if user.username == userData.user.username %}
+<div class="card card-body p-0 mb-4">
+  <form action="{% url 'tweet_publish' %}" method="POST" id="tweet_post_form">
+    {% csrf_token %}
+    <textarea class="form-control" name="tweet_content" id="tweet_post_form_input" placeholder="What's on your mind?"></textarea>
+    <input type="hidden" name="redirect_uri" value="profile">
+    <div class="d-flex justify-content-end">
+      <button type="submit" class="btn px-4" id="tweet_post_form_btn">Post</button>
+    </div>
+  </form>
+</div>
+{% endif %}
+<!--feed input box :end-->
+<!--tweet :start-->
+{% if tweets %}
+{% for tweet in tweets %}
+<div class="card mb-4">
+  <div class="card-body">
+    <div class="card-title card_header_feed mb-4"><img class="shadow-sm mr-2" src="{{ tweet.user.profile_img }}"><h6 class="d-inline">{{ tweet.user.user.first_name }} {{ tweet.user.user.last_name }}</h6>&nbsp;<span class="text-muted">@{{ tweet.user.user.username }}</span>&nbsp;<i class="fa-solid fa-circle mr-1" style="font-size: 3px; vertical-align: middle;"></i><small class="text-muted">{{ tweet.publish_date|timesince }} ago</small>
+      <div class="dropdown d-inline float-right">
+        <a  class="dropdown-toggle" data-toggle="dropdown"><i class="fa-solid fa-ellipsis text-muted"></i></a>
+        <div class="dropdown-menu dropdown-menu-right">
+      {% if user.username == tweet.user.user.username %}
+        <a class="dropdown-item" href="#"><i class="fas fa-edit text-muted mr-2"></i>Edit</a>
+        <hr class="text-muted m-0">
+        <a class="dropdown-item" href="{% url 'tweet_remover' tweet=tweet.id uri='profile' %}"><i class="fas fa-trash text-muted mr-2"></i>Delete</a>
+      {% else %}
+        <a class="dropdown-item" href="#"><i class="fa-solid fa-flag text-muted mr-2"></i>Report this post</a>
+      {% endif %}
+        </div>
+      </div>
+    </div>
+      <p class="card-text">{{ tweet.content|markdown_it|safe }}</p>
+    <hr class="text-muted mb-1">
+    <div class="d-inline mr-4">
+      <form id="like_form" tweet_id="{{ tweet.id }}" class="d-inline">
+        <button type="submit" class="btn like_btn">
+        <div class="d-inline" id="react_icon{{ tweet.id }}">
+          {% if user.account in tweet.likes.all %}
+          <i class="fas fa-heart text-danger"></i>
+          {% else %}
+          <i class="far fa-heart"></i>
+          {% endif %}
+        </div>
+        <span id="react_count{{ tweet.id }}">{{ tweet.total_likes }}</span>
+        </button>
+        </form>      
+    </div>
+    <div class="d-inline">
+      <a href="#comment_collapse{{ tweet.id }}" data-toggle="collapse" role="button" class="text-dark text-decoration-none"><i class="fa-regular fa-comment"></i></a> <span id="comment_count{{ tweet.id }}">{{ tweet.total_comments }}</span>
+    </div>
+
+    <div class="collapse mt-3" id="comment_collapse{{ tweet.id }}">
+        <form id="tweet_comment_form" tweet_id="{{ tweet.id }}">
+          {% csrf_token %}
+          <div class="d-flex">
+            <img class="shadow-sm" src="{{ user.account.profile_img }}">
+            <textarea class="form-control d-inline-block" name="tweet_comment" id="tweet_comment_field{{ tweet.id }}" placeholder="write a comment..."></textarea>
+          </div>
+          <div class="d-flex justify-content-end">
+            <button type="submit" class="btn btn-sm px-4">Comment</button>
+          </div>
+        </form>
+        <hr class="text-muted mt-0 mb-1">
+        <ul class="list-group list-group-flush" id="comment_container">
+          {% for comment in tweet.comments.all reversed %}
+          <li class="list-group-item">
+            <div class="card card-body p-0" style="border: none;">
+              <div class="card-title card_header_feed">
+                <img class="shadow-sm mr-2" src="{{ comment.user.profile_img }}"><h6 class="d-inline">{{ comment.user.user.first_name }} {{ comment.user.user.last_name }}</h6>&nbsp;<span class="text-muted">@{{ comment.user }}</span>&nbsp;<i class="fa-solid fa-circle mr-1" style="font-size: 3px; vertical-align: middle;"></i><small class="text-muted">{{ comment.publish_date|timesince }}</small>
+                <div class="dropdown d-inline float-right">
+                  <a  class="dropdown-toggle" data-toggle="dropdown"><i class="fa-solid fa-ellipsis text-muted"></i></a>
+                  <div class="dropdown-menu dropdown-menu-right">
+                    <a class="dropdown-item" href="#"><i class="fa-solid fa-flag text-muted mr-2"></i>Report this comment</a>
+                  </div>
+                </div>
+              </div>
+              <p class="card-text ml-4">{{ comment.content }}</p>
+            </div>
+          </li>
+        {% endfor %}
+        </ul>
+    </div>
+
+  </div>
+</div>
+{% endfor %}
+{% else %}
+<div class="text-center mb-2">
+<small class="text-muted d-block">{{ userData.user.first_name }} have no tweets!</small>
+</div>
+{% endif %}
+<!--tweet :end-->
+    </div>
+    <!-- about panel -->
+    <div class="tab-pane fade pb-2" id="about-tab" role="tabpanel">
+      <div class="card card-body">
+        <small class="text-muted">Website</small>
+        <hr class="text-muted mt-0 mb-2">
+        <p>
+          <i class="fas fa-globe text-muted mr-2"></i>
+          <a href="{{ userData.website }}" target="_blank" class="text-decoration-none text-info">{{ userData.website }}</a>
+        </p>
+        {% if userData.hide_email != True %}
+          <small class="text-muted">Email</small>
+          <hr class="text-muted mt-0 mb-2">
+          <p>
+            <i class="fas fa-envelope text-muted mr-2"></i>
+            <a class="text-decoration-none text-info">{{ userData.user.email }}</a>
+          </p>
+        {% endif %}
+      </div>
+    </div>
+</div>
+<!--feed :end-->
+</div>
+</div>
+
+<div class="col-md-4 d-none d-sm-block">
+{% include "base/right_sidebar.html" %}
+</div>
+
+</div>
+</div>
+
+{% if user.username == userData.user.username %}
+<!-- edit modal -->
+<div class="modal fade" id="edit_modal" tabindex="-1" role="dialog">
+  <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+    <div class="modal-content">
+<form action="{% url 'profile_edit' %}" method="POST" id="profile_edit_form">
+  {% csrf_token %}
+      <div class="modal-header">
+        <h5 class="modal-title">Edit Profile</h5>
+        <button type="button" class="close" data-dismiss="modal">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+      <div class="row">
+        <div class="col-lg-8 mb-2">
+          <div class="card card-body p-0">
+            <img src="{{ userData.cover_img }}" class="img-fluid" id="edit_form_cover_img_src">
+            <div id="upload_progress_cover"></div>
+            <input type="file" id="edit_form_cover_img_new">
+            <input type="hidden" name="cover_img" value="{{ userData.cover_img }}" id="edit_form_cover_img">
+          </div>
+        </div>
+        <div class="col-lg-4 mb-4">
+          <div class="card card-body">
+            <img src="{{ userData.profile_img }}" class="img-fluid mb-2 mx-auto" id="edit_form_profile_img_src" style="width: 125px; height: 125px; border-radius: 50%;">
+            <div id="upload_progress_profile"></div>
+            <input type="file" class="mx-auto" id="edit_form_profile_img_new">
+            <input type="hidden" name="profile_img" value="{{ userData.profile_img }}" id="edit_form_profile_img">
+          </div>
+        </div>
+        <div class="col-12">
+          <small class="text-muted">Personal Information</small>
+          <hr class="text-muted mt-0">
+          <div class="row">
+            <div class="col-6">
+              <input type="text" class="form-control" name="fname" value="{{ userData.user.first_name }}" placeholder="First name" id="edit_form_fname">
+            </div>
+            <div class="col-6">
+              <input type="text" class="form-control" name="lname" value="{{ userData.user.last_name }}" placeholder="Surname" id="edit_form_lname">
+            </div>
+            <div class="col-12 mt-2">
+              <input type="text" class="form-control" name="bio" value="{{ userData.bio }}" placeholder="Bio" id="edit_form_bio">
+            </div>
+            <div class="col-12 mt-2">
+              <input type="url" class="form-control" name="website" value="{{ userData.website }}" placeholder="Website" id="edit_form_website">
+            </div>
+          </div>
+        </div>
+      </div>
+      </div>
+      <div class="modal-footer d-flex justify-content-between p-0">
+        <button type="button" class="btn btn-danger btn-sm" data-dismiss="modal">Close</button>
+        <button type="submit" class="btn btn-success btn-sm">Save changes</button>
+      </div>
+</form>
+    </div>
+  </div>
+</div>
+<!-- setting modal -->
+<div class="modal fade" id="setting_modal" tabindex="-1" role="dialog">
+  <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Account Settings</h5>
+        <button type="button" class="close" data-dismiss="modal">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body pt-0">
+        <ul class="nav nav-tabs d-flex justify-content-center" role="tablist">
+          <li class="nav-item" role="presentation">
+            <button class="nav-link active" data-toggle="tab" data-target="#preference" type="button" role="tab">Email Preference</button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" data-toggle="tab" data-target="#security" type="button" role="tab">Security</button>
+          </li>
+        </ul>
+        <div class="tab-content" id="myTabContent">
+          <div class="tab-pane fade show active px-2" id="preference" role="tabpanel">
+        <form action="{% url 'account_setting_email' %}" method="POST">
+          {% csrf_token %}
+            <div class="row mt-4">
+              <div class="col-md-6 pl-0 mb-2">
+                <input type="email" class="form-control" name="email" value="{{ userData.user.email }}" placeholder="Email" required>
+              </div>
+              <div class="col-md-6 form-check">
+                <input type="checkbox" name="hide_email" class="form-check-input" id="hide_email" {% if userData.hide_email %}checked{% endif %}>
+                <label class="form-check-label" for="hide_email">
+                  Hide Email
+                </label>
+                <small class="text-muted d-block">If this checked your email will not visible to public.</small>
+              </div>
+              <div class="col-12 text-center">
+                <hr>
+                <button type="submit" class="btn btn-primary btn-sm">Update</button>
+              </div>
+            </div>
+        </form>
+          </div>
+          <div class="tab-pane fade" id="security" role="tabpanel">
+            <form id="password_change_form">
+              <div class="row d-flex justify-content-center mt-4">
+                <div class="col-md-6">
+                  <input type="password" class="form-control mb-2" id="password_change_form_password" placeholder="Old password" required>
+                  <input type="password" class="form-control mb-2" id="password_change_form_password1" placeholder="New password" required>
+                  <input type="password" class="form-control" id="password_change_form_password2" placeholder="Confirm password" required>
+                  <small id="password_change_form_msg"></small>
+
+                  <ul class="text-muted mb-0">
+                    <li>
+                      <small>Your password can’t be too similar to your other personal information.</small>
+                    </li>
+                    <li>
+                      <small>Your password must contain at least 8 characters.</small>
+                    </li>
+                    <li>
+                      <small>Your password can’t be a commonly used password.</small>
+                    </li>
+                    <li>
+                      <small>Your password can’t be entirely numeric.</small>
+                    </li>
+                  </ul>
+                </div>
+                <div class="col-12 text-center">
+                  <hr>
+                  <button type="submit" class="btn btn-danger btn-sm">Change password</button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+{% endblock body %}
+{% block script %}
+<script src="https://www.gstatic.com/firebasejs/3.7.4/firebase.js"></script>
+<script>
+$(document).ready(function(){
+  const config = {
+  apiKey: "AIzaSyAIs2t5O7nLlpOUpPTGXyFOkOTQgter_I4",
+  authDomain: "tweeby-cdn.firebaseapp.com",
+  projectId: "tweeby-cdn",
+  storageBucket: "tweeby-cdn.appspot.com",
+  messagingSenderId: "151856064727",
+  appId: "1:151856064727:web:74399c3ed1e7e13fde6892",
+  databaseURL: "https://console.firebase.google.com/project/tweeby-cdn/storage/tweeby-cdn.appspot.com/files"
+};
+  const app = firebase.initializeApp(config);
+  function filename_generator(len){
+  let s = "";
+  let randomchar = function(){
+    let n = Math.floor(Math.random() * 62);
+    if (n < 10) return n;
+    if (n < 36) return String.fromCharCode(n + 55);
+    return String.fromCharCode(n + 61);
+  }
+  while (s.length < len) s += randomchar();
+  return s;
+}
+function uploader(input, value, type){
+  input.on("change", function(e){
+    let file = e.target.files[0];
+    let storageRef = firebase.storage().ref(type+"_img/"+filename_generator(25));
+    let task = storageRef.put(file);
+    task.on("state_changed", function progress(snapshot){
+    let percentage = (snapshot.bytesTransferred/snapshot.totalBytes)*100;
+    $("#upload_progress_"+type).html(`<div class="progress mb-2" style="height: 5px;">
+              <div class="progress-bar progress-bar-striped bg-warning" role="progressbar" style="width: ${Math.round(percentage)}%" aria-valuenow="${Math.round(percentage)}" aria-valuemin="0" aria-valuemax="100"></div>
+            </div>`);
+  }, function error(error){
+    console.log(error);
+  }, function complete(){
+    task.snapshot.ref.getDownloadURL().then((url) => {
+      value.val(url);
+      $("#edit_form_"+type+"_img_src").removeAttr("src");
+      $("#edit_form_"+type+"_img_src").attr("src", url);
+    });
+  });
+  });
+}
+uploader($("#edit_form_profile_img_new"), $("#edit_form_profile_img"), "profile");
+uploader($("#edit_form_cover_img_new"), $("#edit_form_cover_img"), "cover");
+
+$(".profile_clipboard_btn").attr("data-clipboard-text", window.location.href);
+});
+$(document).on("submit", "#like_form", function(e){
+  e.preventDefault();
+  let form = $(this);
+  let tweet_id = form.attr("tweet_id");
+  let react_count = $("#react_count"+tweet_id);
+  let react_icon = $("#react_icon"+tweet_id);
+
+  $.ajax({
+    type: "POST",
+    url: "{% url 'likes_handler' %}",
+    data: {tweet_id: tweet_id},
+    success: function(res){
+      if(res.status === 0){
+        react_count.html(res.total);
+        react_icon.html("<i class='far fa-heart'></i>");
+      }else{
+        react_count.html(res.total);
+        react_icon.html("<i class='fas fa-heart text-danger'></i>");
+      }
+    }
+  });
+});
+
+$(document).on("submit", "#tweet_comment_form", function(e){
+  e.preventDefault();
+  let form = $(this);
+  let tweet_id = form.attr("tweet_id");
+  let content = $("#tweet_comment_field"+tweet_id).val()
+  let comment_count = $("#comment_count"+tweet_id);
+
+  $.ajax({
+    type: "POST",
+    url: "{% url 'tweet_comment_publish' %}",
+    data: {tweet_id: tweet_id, content: content},
+    success: function(res){
+      if(res.status === 0){
+        let res_data = `<li class="list-group-item" style="background: aliceblue;">
+            <div class="card card-body p-0" style="background: aliceblue; border: none;">
+              <div class="card-title card_header_feed">
+                <img class="shadow-sm mr-2" src="${res.user_img}"><h6 class="d-inline">${res.user_full_name}</h6>&nbsp;<span class="text-muted">@${res.username}</span>&nbsp;<i class="fa-solid fa-circle mr-1" style="font-size: 3px; vertical-align: middle;"></i><small class="text-muted">0 minutes ago</small>
+                <div class="dropdown d-inline float-right">
+                  <a  class="dropdown-toggle" data-toggle="dropdown"><i class="fa-solid fa-ellipsis text-muted"></i></a>
+                  <div class="dropdown-menu dropdown-menu-right">
+                    <a class="dropdown-item" href="#"><i class="fa-solid fa-flag text-muted mr-2"></i>Report this comment</a>
+                  </div>
+                </div>
+              </div>
+              <p class="card-text ml-4">${content}</p>
+            </div>
+          </li>`;
+          comment_count.text(res.total);
+        $("#comment_container").prepend(res_data);
+        form[0].reset();
+      }
+    }
+  });
+});
+
+$("#follow_form").on("submit", function(e){
+  e.preventDefault();
+  $.ajax({
+    type: "POST",
+    url: "{% url 'follow_handler' %}",
+    data: {user: $(this).attr("user")},
+    success: function(res){
+      $("#followers").html(res.total);
+      if(res.status == 0){
+        $(".follow_btn").removeClass("btn-light border");
+        $(".follow_btn").html("Follow");
+        $(".follow_btn").addClass("btn btn-dark follow_btn px-3");
+      }else{
+        $(".follow_btn").removeClass("btn-dark");
+        $(".follow_btn").html("<i class='fas fa-user-check text-success'></i> Unfollow");
+        $(".follow_btn").addClass("btn btn-light border follow_btn px-3");
+      }
+    }
+  });
+});
+
+$("#password_change_form").submit(function(e){
+  e.preventDefault();
+  let password = $("#password_change_form_password").val();
+  let password1 = $("#password_change_form_password1").val();
+  let password2 = $("#password_change_form_password2").val();
+  let msg = $("#password_change_form_msg");
+  $.ajax({
+    type: "POST",
+    url: "{% url 'account_setting_password' %}",
+    data: {password, password1, password2},
+    success: function(res){
+      msg.html("");
+      msg.removeAttr("class");
+      if(res.type == "error"){
+        msg.addClass("text-danger");
+      }else if(res.type == "success"){
+        msg.addClass("text-success");
+        setTimeout(() => {
+          window.location.href = "/login";
+        }, 3000);
+      }
+      msg.text(res.msg);
+      $("#password_change_form")[0].reset();
+    }
+  });
+});
+</script>
+{% endblock script %}
