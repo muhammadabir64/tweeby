@@ -4,21 +4,21 @@ Tweeby is an social platform, inpired by twitter, instagram & whatsapp (you can 
 #### Demo URL: https://tweeby-7gzy.onrender.com
 #### Admin URL: https://tweeby-7gzy.onrender.com/admin
 
-#### Preview
-## login page
+## Preview
+#### login page
 ![login](https://github.com/muhammadabir64/tweeby/assets/51321911/12784ee2-3dcd-4266-abec-4f1aaec59fab)
 
-## newsfeed
+#### newsfeed
 ![feed](https://github.com/muhammadabir64/tweeby/assets/51321911/282c4781-3852-42c7-ba6b-508fd07553be)
 
-## one-to-one chatroom
+#### one-to-one chatroom
 ![private_chat](https://github.com/muhammadabir64/tweeby/assets/51321911/32a49ff6-cedc-42e0-88ff-365923c342c0)
 
-## global chatroom
+#### global chatroom
 ![global_chat](https://github.com/muhammadabir64/tweeby/assets/51321911/2d06571f-49fd-446f-8a9f-86203578bfc6)
 
-## profile
+#### profile
 ![profile](https://github.com/muhammadabir64/tweeby/assets/51321911/d716c80b-11e9-4a65-8c64-a8e7b703101d)
 
-## django default admin panel
+#### django default admin panel
 ![admin](https://github.com/muhammadabir64/tweeby/assets/51321911/cf20c5f3-71b9-47ab-b6cf-85122fbd8cac)
